@@ -1,0 +1,2255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uncertain Knowledge and Reasoning Methods</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            position: relative;
+        }
+
+        :root {
+            --primary: #1a1a1a;
+            --accent: #2d5016;
+            --light-gray: #f5f5f5;
+            --medium-gray: #333333;
+            --border: #e0e0e0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+            color: var(--primary);
+            line-height: 1.6;
+            background: white;
+            width: 100%;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: transparent;
+            z-index: 2000;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+
+        /* Navigation Bar */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 60px;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transform: translateY(-100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        nav.nav-visible {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .nav-logo {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--medium-gray);
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        /* Removed padding-top to allow full-screen hero */
+        body {
+            padding-top: 0;
+        }
+
+        /* Sections */
+        .closing {
+            text-align: center;
+            padding: 100px 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        section {
+            min-height: 100vh;
+            padding: 100px 80px;
+            display: flex;
+            align-items: center;
+            background: white;
+        }
+
+        section:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .section-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .section-content.full-width {
+            grid-template-columns: 1fr;
+            gap: 40px;
+        }
+
+        .section-text {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .section-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 8px;
+            padding: 60px;
+            border: 1px solid var(--border);
+            min-height: 400px;
+        }
+
+        /* Typography */
+        h1 {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 56px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 20px;
+            line-height: 1.2;
+            letter-spacing: -1px;
+        }
+
+        h2 {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 30px;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 26px;
+            color: var(--medium-gray);
+            font-weight: 500;
+            margin-bottom: 40px;
+        }
+
+        p {
+            font-size: 18px;
+            color: var(--medium-gray);
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+
+        /* Speaker Badge */
+        .speaker-badge {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Bullet Lists */
+        .bullet-list {
+            list-style: none;
+            margin: 30px 0;
+        }
+
+        .bullet-list li {
+            margin-bottom: 22px;
+            padding-left: 35px;
+            position: relative;
+            font-size: 18px;
+            line-height: 1.7;
+            color: var(--medium-gray);
+            font-weight: 500;
+        }
+
+        .bullet-list li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-size: 22px;
+        }
+
+        /* Equations */
+        .equation {
+            background: #f0f0f0;
+            padding: 35px;
+            border-left: 5px solid var(--accent);
+            margin: 35px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+        /* Example Box */
+        .example-box {
+            background: #e8f5e9;
+            border-left: 5px solid #4caf50;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 4px;
+            font-size: 17px;
+            line-height: 1.8;
+        }
+
+        .example-box strong {
+            color: #2d5016;
+        }
+
+        /* Key Insight Box */
+        .key-insight {
+            background: #fffbf0;
+            border-left: 5px solid var(--accent);
+            padding: 30px;
+            margin: 30px 0;
+            font-size: 18px;
+            font-weight: 500;
+            border-radius: 4px;
+            line-height: 1.8;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            padding: 100px 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: white;
+        }
+
+        .hero h1 {
+            font-size: 64px;
+            margin-bottom: 30px;
+            color: var(--primary);
+        }
+
+        .hero .subtitle {
+            font-size: 28px;
+            margin-bottom: 60px;
+            color: #666;
+        }
+
+        .audio-container {
+            background: #f9f9f9;
+            padding: 50px;
+            border-radius: 8px;
+            border: 2px solid var(--accent);
+            max-width: 500px;
+            margin: 0 auto 40px;
+        }
+
+        .audio-container p {
+            font-size: 16px;
+            color: #666;
+            margin-top: 20px;
+            font-style: italic;
+        }
+
+        audio {
+            width: 100%;
+            margin: 0;
+        }
+
+        .presenter-info {
+            font-size: 18px;
+            color: var(--medium-gray);
+            margin-top: 60px;
+            font-weight: 500;
+            opacity: 0; /* Hidden on first page */
+        }
+
+        /* Q/A Section Enhancement - Modern Accordion */
+        .qa-section {
+            background: #fff;
+            padding: 100px 80px;
+        }
+
+        .qa-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .qa-item {
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 0;
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            transition: none;
+        }
+
+        .qa-item:first-child {
+            border-top: 1px solid var(--border);
+        }
+
+        .qa-header {
+            width: 100%;
+            padding: 25px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            background: none;
+            border: none;
+            text-align: left;
+            transition: all 0.3s ease;
+        }
+
+        .qa-header:hover .qa-question {
+            color: var(--accent);
+        }
+
+        .qa-question {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary);
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .qa-question:before {
+            content: "Q.";
+            margin-right: 15px;
+            color: var(--accent);
+            font-family: 'Georgia', serif;
+            font-style: italic;
+            font-size: 24px;
+        }
+
+        .qa-icon {
+            font-size: 24px;
+            color: var(--accent);
+            transition: transform 0.3s ease;
+        }
+
+        .qa-item.active .qa-icon {
+            transform: rotate(45deg);
+        }
+
+        .qa-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+            background: #fafafa;
+            border-radius: 4px;
+        }
+
+        .qa-item.active .qa-content {
+            max-height: 500px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .qa-answer {
+            font-size: 17px;
+            color: var(--medium-gray);
+            line-height: 1.8;
+            margin: 0;
+            display: flex;
+            padding-left: 0;
+        }
+
+        .qa-answer:before {
+            content: "A.";
+            margin-right: 15px;
+            color: #666;
+            font-family: 'Georgia', serif;
+            font-style: italic;
+            font-size: 22px;
+            font-weight: normal;
+        }
+
+        /* Scroll Indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            40% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+            60% {
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            font-size: 16px;
+        }
+
+        table th {
+            background: var(--accent);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        table td {
+            border: 1px solid var(--border);
+            padding: 14px 15px;
+            font-size: 16px;
+        }
+
+        table tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* Callout Box */
+        .callout {
+            background: linear-gradient(135deg, #fff9e6 0%, #fffbf0 100%);
+            border: 2px solid var(--accent);
+            padding: 30px;
+            border-radius: 8px;
+            margin: 30px 0;
+            font-size: 17px;
+            line-height: 1.8;
+        }
+
+        .callout strong {
+            color: var(--accent);
+            font-size: 18px;
+        }
+
+        /* Comparison Grid */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .comparison-item {
+            background: white;
+            border: 2px solid var(--border);
+            padding: 25px;
+            border-radius: 8px;
+        }
+
+        .comparison-item h3 {
+            color: var(--accent);
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .comparison-item p {
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        /* Summary Section Enhancement */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 60px auto;
+            text-align: left;
+        }
+
+        .summary-card {
+            background: #fafafa;
+            border: 1px solid var(--border);
+            padding: 30px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .summary-number {
+            font-size: 48px;
+            font-weight: 900;
+            color: rgba(45, 80, 22, 0.1);
+            font-family: 'Georgia', serif;
+            line-height: 1;
+            margin-bottom: -20px;
+        }
+
+        .summary-card h3 {
+            font-size: 20px;
+            color: var(--accent);
+            margin: 0;
+        }
+
+        /* Interactive Section */
+        .interaction-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            height: 800px;
+        }
+
+        .interaction-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .final-callout {
+            max-width: 900px;
+            margin: 80px auto;
+            padding: 40px;
+            background: linear-gradient(135deg, #2d5016 0%, #1a1a1a 100%);
+            color: white;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .final-callout strong {
+            display: block;
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .final-callout p {
+            color: rgba(255,255,255,0.9);
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .quote-section {
+            border-top: 1px solid var(--border);
+            padding-top: 60px;
+            margin-top: 80px;
+            font-size: 24px;
+            font-style: italic;
+            color: var(--medium-gray);
+            line-height: 1.8;
+            font-family: 'Georgia', serif;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .quote-section:before {
+            content: "“";
+            font-size: 80px;
+            color: var(--accent);
+            opacity: 0.2;
+            display: block;
+            margin-bottom: -40px;
+        }
+
+        /* Visual Enhancement */
+        .highlight-box {
+            background: rgba(45, 80, 22, 0.05);
+            padding: 20px;
+            border-left: 4px solid var(--accent);
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .icon-list {
+            list-style: none;
+        }
+
+        .icon-list li {
+            margin-bottom: 15px;
+            padding-left: 40px;
+            position: relative;
+            font-size: 17px;
+        }
+
+        .icon-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4caf50;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 1024px) {
+            .section-content {
+                grid-template-columns: 1fr;
+                gap: 50px;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+
+            section {
+                padding: 80px 40px;
+            }
+
+            h1 {
+                font-size: 44px;
+            }
+
+            h2 {
+                font-size: 36px;
+            }
+
+            .subtitle {
+                font-size: 20px;
+            }
+
+            nav {
+                padding: 0 40px;
+            }
+
+            .nav-links {
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                height: auto;
+                padding: 15px 20px;
+                gap: 15px;
+            }
+
+            body {
+                padding-top: 120px;
+            }
+
+            section, .closing, .qa-section {
+                padding: 60px 20px;
+                min-height: auto;
+                width: 100%;
+                overflow: hidden;
+            }
+
+            h1 {
+                font-size: 32px !important;
+                word-wrap: break-word;
+            }
+
+            h2 {
+                font-size: 28px;
+            }
+
+            .subtitle {
+                font-size: 18px;
+            }
+
+            .bullet-list li {
+                font-size: 16px;
+            }
+
+            .section-visual {
+                padding: 40px;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+                width: 100%;
+            }
+
+            .final-callout {
+                padding: 30px 20px;
+                margin: 40px 0;
+                width: 100%;
+            }
+        }
+
+        section {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* NEW: Observation Collapse (Fuzzy Concept) */
+        .fuzzy-concept {
+            filter: blur(12px);
+            cursor: pointer;
+            transition: filter 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s ease;
+            position: relative;
+            user-select: none;
+        }
+
+        .fuzzy-concept:hover {
+            transform: scale(1.01);
+        }
+
+        .fuzzy-concept.observed {
+            filter: blur(0);
+            cursor: default;
+        }
+
+        .observation-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--accent);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 10;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .observed .observation-hint {
+            opacity: 0;
+        }
+
+        /* NEW: Network Builder */
+        .network-builder-container {
+            background: #fdfdfd;
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            height: 500px;
+            position: relative;
+            overflow: hidden;
+            margin: 30px 0;
+        }
+
+        .concept-chip {
+            background: white;
+            border: 2px solid var(--accent);
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: grab;
+            position: absolute;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            z-index: 5;
+        }
+
+        .concept-chip:active {
+            cursor: grabbing;
+        }
+
+        .network-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .builder-tools {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        /* NEW: Contradiction Detector */
+        .detector-container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .detector-header {
+            background: var(--primary);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .detector-body {
+            padding: 40px;
+        }
+
+        .choice-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .choice-card {
+            padding: 25px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .choice-card:hover {
+            border-color: var(--accent);
+            background: #f9fff9;
+        }
+
+        .choice-card.selected {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .detector-reveal {
+            margin-top: 40px;
+            padding: 30px;
+            background: #f0f4ff;
+            border-radius: 12px;
+            display: none;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* SMARTBOARD: Highlighted Bullet Points */
+        .bullet-list li {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 10px 10px 10px 35px;
+            border-radius: 8px;
+        }
+
+        .bullet-list li.focused-point {
+            background: rgba(45, 80, 22, 0.1);
+            transform: translateX(10px);
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* SMARTBOARD: Doodle Canvas */
+        #doodleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9998;
+            pointer-events: none; /* Default to off */
+            cursor: crosshair;
+        }
+
+        #doodleCanvas.active {
+            pointer-events: all;
+        }
+
+        /* SMARTBOARD: Floating Smart Toolbar */
+        .smart-toolbar {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 10000;
+            background: rgba(255,255,255,0.9);
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+        }
+
+        .smart-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: var(--light-gray);
+            color: var(--primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.2s ease;
+        }
+
+        .smart-btn.active {
+            background: var(--accent);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .smart-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* SMARTBOARD: Giant Nav Arrows */
+        .giant-nav {
+            position: fixed;
+            bottom: 30px;
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.5);
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            cursor: pointer;
+            color: var(--primary);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .giant-nav:hover {
+            background: white;
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .giant-nav.prev { left: 40px; }
+        .giant-nav.next { right: 40px; }
+
+        @media (max-width: 768px) {
+            .giant-nav { width: 60px; height: 60px; font-size: 20px; bottom: 20px; }
+            .giant-nav.prev { left: 10px; }
+            .giant-nav.next { right: 10px; }
+        }
+
+        @media print {
+            .smart-toolbar, .giant-nav, #doodleCanvas { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-bar" id="myBar"></div>
+    </div>
+
+    <!-- Doodle Layer -->
+    <canvas id="doodleCanvas"></canvas>
+
+    <!-- Smart Toolbar -->
+    <div class="smart-toolbar">
+        <button class="smart-btn" id="penBtn" title="Doodle Mode">🖋️</button>
+        <button class="smart-btn" id="clearBtn" title="Clear Ink">🗑️</button>
+        <button class="smart-btn" id="fullBtn" title="Fullscreen">📺</button>
+    </div>
+
+    <!-- Giant Nav -->
+    <div class="giant-nav prev" onclick="navigateSections(-1)">←</div>
+    <div class="giant-nav next" onclick="navigateSections(1)">→</div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-logo">Uncertain Knowledge</div>
+        <ul class="nav-links">
+            <li><a href="#intro">Voice</a></li>
+            <li><a href="#intro-poll">Icebreaker</a></li>
+            <li><a href="#qualification">Problem</a></li>
+            <li><a href="#bayes">Bayes</a></li>
+            <li><a href="#malware">Malware</a></li>
+            <li><a href="#malware-poll">Vote</a></li>
+            <li><a href="#networks">Networks</a></li>
+            <li><a href="#decision">Decision</a></li>
+            <li><a href="#interaction">Summary Poll</a></li>
+            <li><a href="#closing">Q&A</a></li>
+        </ul>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="hero" id="intro">
+        <h1 style="display: none;">Uncertain Knowledge and Reasoning Methods</h1>
+        <div class="subtitle" style="display: none;">How AI Survives When It Doesn't Have All the Facts</div>
+        
+            <h3 style="margin-bottom: 20px; color: var(--accent);">Uncertainty Voice</h3>
+            <p id="speechText" style="font-style: italic; color: var(--medium-gray); margin-bottom: 20px;">"The only certainty is that nothing is certain..."</p>
+            <div id="audioContainer"></div>
+            <p>🔊 Press the button below to hear the voice of Uncertainty. We use the browser's vocal engine to speak what we cannot know.</p>
+            <button id="initAudioBtn" style="margin-top: 15px; padding: 12px 24px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; display: inline-block;">Speak Uncertainty</button>
+
+        <div class="presenter-info" style="display: none;">
+            <strong>Presented by:</strong> Garv, Suvarna, and Ketki
+        </div>
+
+        <div class="scroll-indicator" style="display: none;">↓ Scroll to explore ↓</div>
+    </section>
+
+    <!-- INTRO POLL -->
+    <section class="interaction" id="intro-poll" style="background: white; min-height: auto; padding: 60px 20px;">
+        <div class="section-content" style="display: block; text-align: center;">
+            <h2 style="font-size: 32px; color: var(--accent); margin-bottom: 10px;">Icebreaker: First Impressions</h2>
+            <p class="subtitle" style="margin-bottom: 30px;">What is the first word that comes to mind when you hear "AI Uncertainty"?</p>
+            <div class="interaction-container">
+                <iframe src="https://wall.sli.do/event/oTc2U8UNFvv23LeTqttbFP?section=e148de15-43b2-4e78-b6a3-0d0799ca3850" title="Intro Word Cloud"></iframe>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 1: The Qualification Problem -->
+    <section id="qualification">
+        <div class="section-content">
+            <div class="section-text fuzzy-concept" onclick="this.classList.add('observed')">
+                <div class="observation-hint">Tap to Observe Concept</div>
+                <span class="speaker-badge">GARV</span>
+                <h2>The Qualification Problem</h2>
+                <p class="subtitle">Why Strict Logic Fails</p>
+                
+                <ul class="bullet-list">
+                    <li><strong>Strict Logic:</strong> IF bird THEN flies (100% True or False)</li>
+                    <li><strong>The Problem:</strong> What about penguins? Injured birds? Birds in casts?</li>
+                    <li><strong>The Challenge:</strong> Impossible to list every exception to every rule</li>
+                    <li><strong>The Consequence:</strong> AI cannot function on rigid rules alone</li>
+                </ul>
+
+                <div class="example-box">
+                    <strong>Real Example:</strong> A rules-based spam filter might say "IF has word 'free' THEN spam." But legitimate emails about free shipping get blocked. The rule fails.
+                </div>
+            </div>
+            <div class="section-visual">
+                <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="50" y="20" width="300" height="60" fill="#2d5016" stroke="#1a1a1a" stroke-width="2" rx="4"/>
+                    <text x="200" y="55" font-size="18" font-weight="bold" text-anchor="middle" fill="white">IF Bird THEN Flies</text>
+                    
+                    <circle cx="100" cy="150" r="35" fill="#ff6b6b" stroke="#1a1a1a" stroke-width="2"/>
+                    <text x="100" y="160" font-size="12" text-anchor="middle" fill="white" font-weight="bold">Penguin</text>
+                    
+                    <circle cx="200" cy="150" r="35" fill="#ff6b6b" stroke="#1a1a1a" stroke-width="2"/>
+                    <text x="200" y="155" font-size="11" text-anchor="middle" fill="white" font-weight="bold">Injured</text>
+                    <text x="200" y="170" font-size="11" text-anchor="middle" fill="white" font-weight="bold">Bird</text>
+                    
+                    <circle cx="300" cy="150" r="35" fill="#ff6b6b" stroke="#1a1a1a" stroke-width="2"/>
+                    <text x="300" y="155" font-size="11" text-anchor="middle" fill="white" font-weight="bold">Toy</text>
+                    <text x="300" y="170" font-size="11" text-anchor="middle" fill="white" font-weight="bold">Bird</text>
+                    
+                    <text x="200" y="260" font-size="16" text-anchor="middle" font-weight="bold" fill="#2d5016">Exceptions Grow Infinitely</text>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: Degrees of Belief -->
+    <section>
+        <div class="section-content">
+            <div class="section-text">
+                <span class="speaker-badge">GARV</span>
+                <h2>Degrees of Belief</h2>
+                <p class="subtitle">Probability as the Solution</p>
+                
+                <ul class="bullet-list">
+                    <li><strong>Prior Probability P(A):</strong> What the AI believes before evidence</li>
+                    <li><strong>Posterior Probability P(A|B):</strong> What the AI believes after observing evidence</li>
+                    <li><strong>The Shift:</strong> From binary (True/False) to continuous (0 to 1)</li>
+                    <li><strong>The Gain:</strong> AI can now handle uncertainty naturally</li>
+                </ul>
+
+                <div class="callout">
+                    <strong>Example:</strong> Instead of "Bird flies: TRUE," we say "Probability this bird flies: 0.85." Much more realistic.
+                </div>
+            </div>
+            <div class="section-visual">
+                <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="probGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+                            <stop offset="0%" style="stop-color:#2d5016;stop-opacity:0.3" />
+                            <stop offset="100%" style="stop-color:#2d5016;stop-opacity:0.8" />
+                        </linearGradient>
+                    </defs>
+                    
+                    <path d="M 30 250 Q 100 80, 200 60 T 370 250" stroke="#2d5016" stroke-width="3" fill="none"/>
+                    <path d="M 30 250 Q 100 80, 200 60 T 370 250 L 370 250 L 30 250" fill="url(#probGrad)"/>
+                    
+                    <line x1="30" y1="250" x2="370" y2="250" stroke="#1a1a1a" stroke-width="2"/>
+                    <line x1="30" y1="30" x2="30" y2="250" stroke="#1a1a1a" stroke-width="2"/>
+                    
+                    <text x="15" y="270" font-size="14" font-weight="bold">0</text>
+                    <text x="360" y="270" font-size="14" font-weight="bold">1</text>
+                    <text x="200" y="290" font-size="14" text-anchor="middle" font-weight="bold">Probability</text>
+                    <text x="15" y="20" font-size="14" font-weight="bold">Belief</text>
+                    
+                    <circle cx="200" cy="60" r="5" fill="#ff6b6b"/>
+                    <text x="200" y="45" font-size="12" text-anchor="middle" fill="#ff6b6b" font-weight="bold">Peak Uncertainty</text>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: Full Joint Probability Distribution -->
+    <section>
+        <div class="section-content">
+            <div class="section-text">
+                <span class="speaker-badge">SUVARNA</span>
+                <h2>The Full Joint Probability Distribution</h2>
+                <p class="subtitle">The Master Lookup Table</p>
+                
+                <ul class="bullet-list">
+                    <li><strong>Definition:</strong> A table with every possible combination of events and their probabilities</li>
+                    <li><strong>The Promise:</strong> Look up ANY scenario instantly</li>
+                    <li><strong>The Power:</strong> Contains all information about the system</li>
+                    <li><strong>The Problem:</strong> Practically impossible to build for real systems</li>
+                </ul>
+
+                <div class="example-box">
+                    <strong>Example:</strong> Imagine tracking weather for every location on Earth for every hour. One table per day would require MORE data than all computers combined could store.
+                </div>
+            </div>
+            <div class="section-visual">
+                <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="20" y="20" width="360" height="200" fill="none" stroke="#2d5016" stroke-width="2"/>
+                    
+                    <rect x="20" y="20" width="120" height="40" fill="#2d5016"/>
+                    <rect x="140" y="20" width="120" height="40" fill="#2d5016"/>
+                    <rect x="260" y="20" width="120" height="40" fill="#2d5016"/>
+                    
+                    <text x="80" y="50" font-size="12" text-anchor="middle" fill="white" font-weight="bold">Event A</text>
+                    <text x="200" y="50" font-size="12" text-anchor="middle" fill="white" font-weight="bold">Event B</text>
+                    <text x="320" y="50" font-size="12" text-anchor="middle" fill="white" font-weight="bold">P(A,B)</text>
+                    
+                    <line x1="20" y1="60" x2="380" y2="60" stroke="#ddd" stroke-width="1"/>
+                    <line x1="20" y1="100" x2="380" y2="100" stroke="#ddd" stroke-width="1"/>
+                    <line x1="20" y1="140" x2="380" y2="140" stroke="#ddd" stroke-width="1"/>
+                    <line x1="20" y1="180" x2="380" y2="180" stroke="#ddd" stroke-width="1"/>
+                    
+                    <line x1="140" y1="20" x2="140" y2="220" stroke="#ddd" stroke-width="1"/>
+                    <line x1="260" y1="20" x2="260" y2="220" stroke="#ddd" stroke-width="1"/>
+                    
+                    <text x="80" y="85" font-size="11" text-anchor="middle">T</text>
+                    <text x="200" y="85" font-size="11" text-anchor="middle">T</text>
+                    <text x="320" y="85" font-size="11" text-anchor="middle">0.42</text>
+                    
+                    <text x="80" y="125" font-size="11" text-anchor="middle">T</text>
+                    <text x="200" y="125" font-size="11" text-anchor="middle">F</text>
+                    <text x="320" y="125" font-size="11" text-anchor="middle">0.18</text>
+                    
+                    <text x="80" y="165" font-size="11" text-anchor="middle">F</text>
+                    <text x="200" y="165" font-size="11" text-anchor="middle">T</text>
+                    <text x="320" y="165" font-size="11" text-anchor="middle">0.26</text>
+                    
+                    <text x="80" y="205" font-size="11" text-anchor="middle">F</text>
+                    <text x="200" y="205" font-size="11" text-anchor="middle">F</text>
+                    <text x="320" y="205" font-size="11" text-anchor="middle">0.14</text>
+                    
+                    <text x="200" y="265" font-size="14" text-anchor="middle" font-weight="bold" fill="#ff6b6b">Scales to 2^n entries...</text>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: The Scaling Crisis -->
+    <section>
+        <div class="section-content">
+            <div class="section-text">
+                <span class="speaker-badge">SUVARNA</span>
+                <h2>The Scaling Crisis</h2>
+                <p class="subtitle">Why the JPD Breaks Down</p>
+                
+                <ul class="bullet-list">
+                    <li><strong>The Formula:</strong> n boolean variables = 2<sup>n</sup> - 1 probabilities</li>
+                    <li><strong>The Reality:</strong> Just 30 variables = Over 1 BILLION rows</li>
+                    <li><strong>The Result:</strong> Memory exhausted. Computation impossible.</li>
+                    <li><strong>The Lesson:</strong> We need a smarter approach</li>
+                </ul>
+
+                <div class="comparison-grid">
+                    <div class="comparison-item">
+                        <h3>JPD Approach</h3>
+                        <p>✗ Complete but unusable<br>✗ Exponential storage<br>✗ Slow computation<br>✗ Practical breakdown at n=20</p>
+                    </div>
+                    <div class="comparison-item">
+                        <h3>Smarter Approach</h3>
+                        <p>✓ Approximate but fast<br>✓ Linear storage<br>✓ Real-time computation<br>✓ Scales to n=1000+</p>
+                    </div>
+                </div>
+            </div>
+            <div class="section-visual">
+                <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="50" y="240" width="30" height="30" fill="#2d5016"/>
+                    <text x="65" y="290" font-size="12" text-anchor="middle" font-weight="bold">5 vars</text>
+                    <text x="65" y="300" font-size="10" text-anchor="middle">31</text>
+                    
+                    <rect x="110" y="200" width="30" height="70" fill="#ff9800"/>
+                    <text x="125" y="290" font-size="12" text-anchor="middle" font-weight="bold">10 vars</text>
+                    <text x="125" y="300" font-size="10" text-anchor="middle">1K</text>
+                    
+                    <rect x="170" y="100" width="30" height="170" fill="#ff6b6b"/>
+                    <text x="185" y="290" font-size="12" text-anchor="middle" font-weight="bold">20 vars</text>
+                    <text x="185" y="300" font-size="10" text-anchor="middle">1M</text>
+                    
+                    <rect x="230" y="30" width="30" height="240" fill="#d32f2f"/>
+                    <text x="245" y="290" font-size="12" text-anchor="middle" font-weight="bold">30 vars</text>
+                    <text x="245" y="300" font-size="10" text-anchor="middle">1B</text>
+                    
+                    <circle cx="320" cy="80" r="20" fill="none" stroke="#ff6b6b" stroke-width="2"/>
+                    <text x="320" y="90" font-size="28" text-anchor="middle">💥</text>
+                    
+                    <line x1="40" y1="275" x2="350" y2="275" stroke="#1a1a1a" stroke-width="2"/>
+                    <line x1="40" y1="30" x2="40" y2="275" stroke="#1a1a1a" stroke-width="2"/>
+                    <text x="200" y="320" font-size="14" text-anchor="middle" font-weight="bold" fill="#d32f2f">Exponential Growth = System Collapse</text>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 5: Conditional Independence -->
+    <section>
+        <div class="section-content">
+            <div class="section-text">
+                <span class="speaker-badge">SUVARNA</span>
+                <h2>The Shortcut: Conditional Independence</h2>
+                <p class="subtitle">AI's Lifeline</p>
+                
+                <ul class="bullet-list">
+                    <li><strong>Absolute Independence:</strong> P(A ∧ B) = P(A) · P(B) (Very rare)</li>
+                    <li><strong>Conditional Independence:</strong> Knowing C makes A and B independent</li>
+                    <li><strong>Example:</strong> Toothache and probe scratch are independent if we know there's a cavity</li>
+                    <li><strong>The Win:</strong> Reduces billions of calculations to hundreds</li>
+                </ul>
+
+                <div class="example-box">
+                    <strong>Real Example:</strong> Rain and your broken sprinkler aren't independent. BUT if you know whether your neighbor has water, they become independent. They don't affect each other anymore—they only affect water availability.
+                </div>
+            </div>
+            <div class="section-visual">
+                <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="80" cy="60" r="25" fill="#2d5016" stroke="#1a1a1a" stroke-width="2"/>
+                    <text x="80" y="65" font-size="12" text-anchor="middle" fill="white" font-weight="bold">A</text>
+                    
+                    <circle cx="150" cy="100" r="25" fill="#2d5016" stroke="#1a1a1a" stroke-width="2"/>
+                    <text x="150" y="105" font-size="12" text-anchor="middle" fill="white" font-weight="bold">B</text>
+                    
+                    <circle cx="80" cy="140" r="25" fill="#2d5016" stroke="#1a1a1a" stroke-width="2"/>
+                    <text x="80" y="145" font-size="12" text-anchor="middle" fill="white" font-weight="bold">C</text>
+                    
+                    <line x1="80" y1="85" x2="150" y2="100" stroke="#ff6b6b" stroke-width="2"/>
+                    <line x1="80" y1="85" x2="80" y2="115" stroke="#ff6b6b" stroke-width="2"/>
+                    <line x1="150" y1="125" x2="80" y2="115" stroke="#ff6b6b" stroke-width="2"/>
+                    
+                    <path d="M 200 100 L 280 100" stroke="#1a1a1a" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <polygon points="0 0, 10 3, 0 6" fill="#1a1a1a" />
+                        </marker>
+                    </defs>
+                    
+                    <circle cx="320" cy="60" r="25" fill="#2d5016" stroke="#1a1a1a" stroke-width="2"/>
+                    <text x="320" y="65" font-size="12" text-anchor="middle" fill="white" font-weight="bold">A</text>
+                    
+                    <circle cx="320" cy="140" r="25" fill="#2d5016" stroke="#1a1a1a" stroke-width="2"/>
+                    <text x="320" y="145" font-size="12" text-anchor="middle" fill="white" font-weight="bold">C</text>
+                    
+                    <line x1="320" y1="85" x2="320" y2="115" stroke="#2d5016" stroke-width="2"/>
+                    
+                    <text x="200" y="200" font-size="12" text-anchor="middle" font-weight="bold">Complex Network</text>
+                    <text x="200" y="215" font-size="10" text-anchor="middle">All Connected</text>
+                    
+                    <text x="200" y="250" font-size="12" text-anchor="middle" font-weight="bold">→ Simplified Chain</text>
+                    <text x="200" y="265" font-size="10" text-anchor="middle">Key Variables Only</text>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 6: Bayes' Theorem -->
+    <section id="bayes">
+        <div class="section-content full-width">
+            <div class="section-text">
+                <span class="speaker-badge">GARV</span>
+                <h2>Bayes' Theorem</h2>
+                <p class="subtitle">The Engine of AI Learning</p>
+                
+                <div class="equation">
+                    P(A|B) = [P(B|A) · P(A)] / P(B)
+                </div>
+
+                <ul class="bullet-list">
+                    <li><strong>P(A|B):</strong> Posterior probability (belief after evidence)</li>
+                    <li><strong>P(B|A):</strong> Likelihood (how likely is the evidence given A?)</li>
+                    <li><strong>P(A):</strong> Prior probability (belief before evidence)</li>
+                    <li><strong>P(B):</strong> Evidence (total probability of observing B)</li>
+                </ul>
+
+                <div class="callout">
+                    <strong>Why This Matters:</strong> Bayes' Theorem is the mathematical foundation of learning. Every time an AI system sees new data, it updates beliefs using this formula. It's how self-driving cars, medical diagnosis systems, and spam filters improve.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 7: How Bayes Works -->
+    <section>
+        <div class="section-content">
+            <div class="section-text">
+                <span class="speaker-badge">GARV</span>
+                <h2>How Bayes Actually Works</h2>
+                <p class="subtitle">From Math to Meaning</p>
+                
+                <div class="equation">
+                    Posterior = [Likelihood × Prior] / Evidence
+                </div>
+
+                <ul class="bullet-list" style="margin-top: 30px;">
+                    <li><strong>Step 1:</strong> Start with what you believed (Prior)</li>
+                    <li><strong>Step 2:</strong> Observe new evidence</li>
+                    <li><strong>Step 3:</strong> Update your belief mathematically</li>
+                    <li><strong>Step 4:</strong> New belief becomes the prior for next observation</li>
+                </ul>
+
+                <div class="highlight-box">
+                    <strong>Real Application:</strong> Medical diagnosis. Prior: "1% of people have disease X." Evidence: "Patient tests positive." Likelihood: "Test is 95% accurate." Posterior: Update to maybe 16% based on ONE positive test.
+                </div>
+            </div>
+            <div class="section-visual">
+                <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                    <text x="200" y="30" font-size="14" text-anchor="middle" font-weight="bold">Belief Evolution</text>
+                    
+                    <path d="M 30 120 Q 80 60, 120 120" stroke="#2d5016" stroke-width="2" fill="none"/>
+                    <text x="75" y="150" font-size="11" text-anchor="middle" font-weight="bold">Prior</text>
+                    
+                    <text x="160" y="80" font-size="18" fill="#ff6b6b">+</text>
+                    <text x="160" y="95" font-size="11" text-anchor="middle" font-weight="bold">Evidence</text>
+                    
+                    <path d="M 200 120 Q 250 40, 290 120" stroke="#ff9800" stroke-width="2" fill="none"/>
+                    <text x="245" y="150" font-size="11" text-anchor="middle" font-weight="bold">Posterior</text>
+                    
+                    <rect x="50" y="200" width="80" height="60" fill="#f0f0f0" stroke="#2d5016" stroke-width="2" rx="4"/>
+                    <text x="90" y="225" font-size="12" text-anchor="middle" font-weight="bold">Initial</text>
+                    <text x="90" y="245" font-size="10" text-anchor="middle">Uncertainty</text>
+                    
+                    <rect x="160" y="200" width="80" height="60" fill="#fff3e0" stroke="#ff9800" stroke-width="2" rx="4"/>
+                    <text x="200" y="225" font-size="12" text-anchor="middle" font-weight="bold">After 1st</text>
+                    <text x="200" y="245" font-size="10" text-anchor="middle">Observation</text>
+                    
+                    <rect x="270" y="200" width="80" height="60" fill="#e8f5e9" stroke="#4caf50" stroke-width="2" rx="4"/>
+                    <text x="310" y="225" font-size="12" text-anchor="middle" font-weight="bold">After Many</text>
+                    <text x="310" y="245" font-size="10" text-anchor="middle">Observations</text>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 8: The Malware Paradox -->
+    <section id="malware">
+        <div class="section-content full-width">
+            <div class="section-text">
+                <span class="speaker-badge">KETKI</span>
+                <h2>The Malware Paradox</h2>
+                <p class="subtitle">Why Human Intuition Fails</p>
+
+                <div class="key-insight">
+                    <strong>🚨 SCENARIO: Your file was flagged by our security scanner.</strong>
+                    <br><br>
+                    • 1% of all files are malware<br>
+                    • Our scanner is 90% accurate<br>
+                    • False-positive rate is 10%<br>
+                    <br>
+                    <strong>What is the probability your file is ACTUALLY malware?</strong>
+                </div>
+
+                <ul class="bullet-list" style="margin-top: 40px;">
+                    <li><strong>Intuitive Guess:</strong> Most humans say 90%</li>
+                    <li><strong>Your Gut:</strong> "The scanner is 90% accurate, so 90%!"</li>
+                    <li><strong>The Trap:</strong> You're ignoring the base rate (1% is rare!)</li>
+                    <li><strong>Next:</strong> Watch Bayes demolish your intuition...</li>
+                </ul>
+
+                <div class="example-box">
+                    <strong>Why We Fail:</strong> Our brains are wired to focus on the test accuracy (90%) and forget that the disease/malware is rare (1%). We commit what psychologists call "base rate neglect."
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MALWARE POLL -->
+    <section class="interaction" id="malware-poll" style="background: #fafafa; min-height: auto; padding: 80px 20px;">
+        <div class="section-content" style="display: block; text-align: center;">
+            <h2 style="font-size: 32px; color: var(--accent); margin-bottom: 10px;">The Trust Factor</h2>
+            <p class="subtitle" style="margin-bottom: 30px;">Would you trust an AI with a 70% certainty score?</p>
+            <div class="interaction-container">
+                <iframe src="https://wall.sli.do/event/oTc2U8UNFvv23LeTqttbFP?section=fce07ded-b483-44b5-acac-9881ce9d4210" title="Trust Poll"></iframe>
+            </div>
+            <p style="margin-top: 20px; font-style: italic; color: var(--medium-gray);">Think about the consequences of being wrong...</p>
+        </div>
+    </section>
+
+    <!-- SECTION 9: The Reveal -->
+    <section>
+        <div class="section-content">
+            <div class="section-text">
+                <span class="speaker-badge">KETKI</span>
+                <h2>The Bayes Calculation</h2>
+                <p class="subtitle">Why Your Intuition Was Wrong</p>
+
+                <div class="equation">
+                    P(Malware|Flagged) = [0.90 × 0.01] / 0.108 = <strong style="color: #d32f2f;">8.3%</strong>
+                </div>
+
+                <ul class="bullet-list" style="margin-top: 40px;">
+                    <li><strong>The Correct Answer:</strong> Only 8.3% (not 90%!)</li>
+                    <li><strong>Why:</strong> Even though the test is accurate, malware is rare (1%)</li>
+                    <li><strong>The Insight:</strong> Most flags are false positives</li>
+                    <li><strong>The Lesson:</strong> AI uses Bayes. Your gut uses cognitive bias.</li>
+                </ul>
+
+                <div class="callout">
+                    <strong>Real-World Impact:</strong> This exact mistake is why medical tests can be scary. A positive test for a rare disease might only mean 5% chance you have it. Doctors know this. Most patients don't.
+                </div>
+            </div>
+            <div class="section-visual">
+                <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                    <text x="200" y="25" font-size="14" text-anchor="middle" font-weight="bold">Out of 100,000 Files</text>
+                    
+                    <rect x="50" y="50" width="80" height="40" fill="#d32f2f" stroke="#1a1a1a" stroke-width="2"/>
+                    <text x="90" y="70" font-size="13" text-anchor="middle" fill="white" font-weight="bold">1,000</text>
+                    <text x="90" y="85" font-size="10" text-anchor="middle" fill="white">Malware</text>
+                    
+                    <rect x="150" y="50" width="230" height="40" fill="#4caf50" stroke="#1a1a1a" stroke-width="2"/>
+                    <text x="265" y="75" font-size="12" text-anchor="middle" fill="white" font-weight="bold">99,000 Clean Files</text>
+                    
+                    <text x="200" y="130" font-size="12" text-anchor="middle" font-weight="bold">What Gets Flagged?</text>
+                    
+                    <rect x="50" y="150" width="60" height="50" fill="#ff6b6b" stroke="#1a1a1a" stroke-width="2"/>
+                    <text x="80" y="175" font-size="11" text-anchor="middle" font-weight="bold">900</text>
+                    <text x="80" y="190" font-size="9" text-anchor="middle">True Positives</text>
+                    
+                    <rect x="130" y="150" width="150" height="50" fill="#ff9800" stroke="#1a1a1a" stroke-width="2"/>
+                    <text x="205" y="180" font-size="12" text-anchor="middle" font-weight="bold">9,900 False Positives</text>
+                    
+                    <text x="200" y="250" font-size="14" text-anchor="middle" font-weight="bold" fill="#d32f2f">900 Real ÷ 10,800 Total = 8.3%</text>
+                    <text x="200" y="275" font-size="12" text-anchor="middle" font-weight="bold">Rare events + imperfect tests = counterintuitive probabilities</text>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW: CONTRADICTION DETECTOR -->
+    <section id="contradiction" style="background: white;">
+        <div class="section-content full-width">
+            <div class="section-text" style="text-align: center;">
+                <span class="speaker-badge">KETKI</span>
+                <h2>The Contradiction Detector</h2>
+                <p class="subtitle">Human Bias vs. AI Logic</p>
+                
+                <div class="detector-container">
+                    <div class="detector-header">
+                        <h3>Scenario: The "Star" Candidate</h3>
+                        <p>You are hiring. 95% of applicants are average, 5% are "Stars."<br>Your AI screening tool is 90% accurate.</p>
+                    </div>
+                    <div class="detector-body">
+                        <p>The tool flags a candidate as a <strong>"STAR."</strong> What do you do?</p>
+                        <div class="choice-grid">
+                            <div class="choice-card" onclick="revealBias('hire')">
+                                <h4>HIRE IMMEDIATELY</h4>
+                                <p>"The AI says they are a star, and it's 90% accurate!"</p>
+                            </div>
+                            <div class="choice-card" onclick="revealBias('wait')">
+                                <h4>REQUEST SECOND INTERVIEW</h4>
+                                <p>"90% is good, but let's be careful."</p>
+                            </div>
+                        </div>
+
+                        <div id="biasReveal" class="detector-reveal">
+                            <h4 id="biasTitle" style="color: var(--primary); margin-bottom: 10px;">The Truth</h4>
+                            <p id="biasDesc" style="margin-bottom: 20px;"></p>
+                            <div class="comparison-grid" style="margin-bottom: 0;">
+                                <div class="comparison-item" style="border-color: #ff6b6b;">
+                                    <h3 style="color: #d32f2f;">Human Instinct</h3>
+                                    <p>"They are probably a Star (90% confident)."</p>
+                                </div>
+                                <div class="comparison-item" style="border-color: #4caf50;">
+                                    <h3 style="color: #2d5016;">Bayesian Logic</h3>
+                                    <p>Actually, there is only a <strong>32% chance</strong> they are a Star.</p>
+                                </div>
+                            </div>
+                            <div class="key-insight" style="margin-top: 20px; text-align: left;">
+                                <strong>Speaker Note:</strong> Explain the <strong>Base Rate Fallacy</strong>. Because Stars are so rare (5%), even a 90% accurate test produces many more "False Stars" than real ones. Human brains ignore the 5% base rate and only see the 90% accuracy. <strong>This is why we contradict logic.</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 10: Bayesian Networks -->
+    <section id="networks">
+        <div class="section-content">
+            <div class="section-text">
+                <span class="speaker-badge">SUVARNA</span>
+                <h2>Bayesian Networks</h2>
+                <p class="subtitle">Mapping Uncertainty Visually</p>
+                
+                <ul class="bullet-list">
+                    <li><strong>What It Is:</strong> A directed graph showing cause-and-effect relationships</li>
+                    <li><strong>Nodes:</strong> Random variables (Cloudy, Rain, Sprinkler, WetGrass)</li>
+                    <li><strong>Edges:</strong> Direct causal influence</li>
+                    <li><strong>CPTs:</strong> Conditional Probability Tables at each node</li>
+                    <li><strong>The Power:</strong> Visualize AND quantify an entire system</li>
+                </ul>
+
+                <div class="example-box">
+                    <strong>Real Application:</strong> Netflix uses Bayesian Networks to model: user-watches-movie → affects-recommendation → affects-future-clicks. Each connection has probabilities.
+                </div>
+            </div>
+            <div class="section-visual">
+                <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="100" cy="60" rx="45" ry="30" fill="#2d5016" stroke="#1a1a1a" stroke-width="2"/>
+                    <text x="100" y="65" font-size="12" text-anchor="middle" fill="white" font-weight="bold">Cloudy</text>
+                    
+                    <ellipse cx="300" cy="100" rx="50" ry="30" fill="#2d5016" stroke="#1a1a1a" stroke-width="2"/>
+                    <text x="300" y="105" font-size="11" text-anchor="middle" fill="white" font-weight="bold">Sprinkler</text>
+                    
+                    <ellipse cx="100" cy="160" rx="45" ry="30" fill="#ff9800" stroke="#1a1a1a" stroke-width="2"/>
+                    <text x="100" y="165" font-size="12" text-anchor="middle" fill="white" font-weight="bold">Rain</text>
+                    
+                    <ellipse cx="220" cy="240" rx="50" ry="30" fill="#4caf50" stroke="#1a1a1a" stroke-width="2"/>
+                    <text x="220" y="245" font-size="12" text-anchor="middle" fill="white" font-weight="bold">WetGrass</text>
+                    
+                    <defs>
+                        <marker id="arrowhead2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <polygon points="0 0, 10 3, 0 6" fill="#1a1a1a" />
+                        </marker>
+                    </defs>
+                    
+                    <path d="M 100 90 L 100 130" stroke="#1a1a1a" stroke-width="2" fill="none" marker-end="url(#arrowhead2)"/>
+                    <path d="M 140 70 Q 220 80, 260 95" stroke="#1a1a1a" stroke-width="2" fill="none" marker-end="url(#arrowhead2)"/>
+                    <path d="M 120 180 Q 170 210, 190 230" stroke="#1a1a1a" stroke-width="2" fill="none" marker-end="url(#arrowhead2)"/>
+                    <path d="M 280 130 Q 250 180, 240 220" stroke="#1a1a1a" stroke-width="2" fill="none" marker-end="url(#arrowhead2)"/>
+                </svg>
+            </div>
+        </div>
+        
+        <div class="section-content full-width" style="margin-top: 60px;">
+            <div class="section-text" style="text-align: center;">
+                <h3>Interactive: Network Structure Builder</h3>
+                <p>Drag the concepts to map the system's causal structure.</p>
+                
+                <div class="network-builder-container" id="builderArea">
+                    <canvas id="networkCanvas" class="network-canvas"></canvas>
+                    
+                    <div class="concept-chip" style="top: 50px; left: 50px;" draggable="true" ondragstart="drag(event)" id="node-cloudy">☁️ Cloudy</div>
+                    <div class="concept-chip" style="top: 150px; left: 50px;" draggable="true" ondragstart="drag(event)" id="node-rain">🌧️ Rain</div>
+                    <div class="concept-chip" style="top: 250px; left: 50px;" draggable="true" ondragstart="drag(event)" id="node-sprinkler">🚿 Sprinkler</div>
+                    <div class="concept-chip" style="top: 150px; left: 250px;" draggable="true" ondragstart="drag(event)" id="node-wet">🌱 Wet Grass</div>
+                    
+                    <div class="builder-tools">
+                        <button onclick="clearLines()" style="padding: 8px 15px; border-radius: 4px; border: 1px solid var(--border); cursor: pointer;">Clear Connections</button>
+                        <p style="font-size: 12px; color: #666; align-self: center;">Click two nodes to connect them</p>
+                    </div>
+                </div>
+                <p style="font-style: italic; color: #666;">Note: This emphasizes structure (how variables influence each other) before we even touch the numbers.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 11: CPTs -->
+    <section>
+        <div class="section-content full-width">
+            <div class="section-text">
+                <span class="speaker-badge">SUVARNA</span>
+                <h2>Inside the Network: CPTs</h2>
+                <p class="subtitle">Conditional Probability Tables</p>
+                
+                <ul class="bullet-list">
+                    <li><strong>CPT Attached to:</strong> Every node in the Bayesian Network</li>
+                    <li><strong>What It Shows:</strong> How parent nodes influence child nodes</li>
+                    <li><strong>Example:</strong> If Cloudy=True, how likely is Rain?</li>
+                    <li><strong>The Quantification:</strong> Turns abstract relationships into hard numbers</li>
+                </ul>
+
+                <table style="margin-top: 40px;">
+                    <thead>
+                        <tr>
+                            <th>Cloudy</th>
+                            <th>P(Rain=true)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>True</strong></td>
+                            <td><strong>0.80</strong> (80% chance)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>False</strong></td>
+                            <td><strong>0.10</strong> (10% chance)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="example-box">
+                    <strong>Reading the Table:</strong> "If it's cloudy, there's an 80% chance of rain. If it's clear, only 10%." This captures the real-world relationship beautifully.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 12: Decision Theory -->
+    <section id="decision">
+        <div class="section-content full-width">
+            <div class="section-text">
+                <span class="speaker-badge">KETKI</span>
+                <h2>Decision Theory</h2>
+                <p class="subtitle">Probability Meets Action</p>
+
+                <div class="key-insight">
+                    <strong>Definition:</strong> Decision Theory = Probability Theory + Utility Theory
+                    <br><br>
+                    An AI doesn't just calculate probabilities. It calculates the VALUE of each outcome and CHOOSES the best action.
+                </div>
+
+                <ul class="bullet-list" style="margin-top: 40px;">
+                    <li><strong>Probability:</strong> How likely is it to rain? (80%)</li>
+                    <li><strong>Utility:</strong> What's the value of being dry? (+10 happiness)</li>
+                    <li><strong>Disutility:</strong> What's the cost of carrying an umbrella? (-2 happiness)</li>
+                    <li><strong>Decision:</strong> Bring umbrella? YES. Expected happiness = 6.8</li>
+                </ul>
+
+                <div class="example-box">
+                    <strong>Business Example:</strong> Should a company launch a product? Probability of success: 70%. Revenue if success: $10M. Loss if failure: $2M. Expected value: 0.7×10M - 0.3×2M = $6.4M. LAUNCH.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 13: Maximum Expected Utility -->
+    <section>
+        <div class="section-content">
+            <div class="section-text">
+                <span class="speaker-badge">KETKI</span>
+                <h2>Maximum Expected Utility</h2>
+                <p class="subtitle">The Principle of Rational Action</p>
+                
+                <div class="equation">
+                    MEU = max { Σ P(outcome|action) × U(outcome) }
+                </div>
+
+                <ul class="bullet-list" style="margin-top: 40px;">
+                    <li><strong>What It Means:</strong> Calculate payoff for every possible action</li>
+                    <li><strong>How It Works:</strong> Multiply probability × utility for each outcome</li>
+                    <li><strong>The Choice:</strong> Pick the action with the highest expected value</li>
+                    <li><strong>The Guarantee:</strong> This is THE most rational decision possible</li>
+                </ul>
+
+                <div class="highlight-box">
+                    <strong>Why Humans Don't Do This:</strong> Our brains can't quickly multiply probabilities and utilities. We use shortcuts (heuristics) that often fail. AI has no such limitation.
+                </div>
+            </div>
+            <div class="section-visual">
+                <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="30" y="50" width="150" height="200" fill="white" stroke="#2d5016" stroke-width="2" rx="4"/>
+                    <text x="105" y="75" font-size="14" text-anchor="middle" font-weight="bold">Bring Umbrella</text>
+                    <text x="105" y="100" font-size="12" text-anchor="middle">If Rain (80%)</text>
+                    <text x="105" y="120" font-size="12" text-anchor="middle">Utility = +8</text>
+                    <text x="105" y="140" font-size="12" text-anchor="middle">If No Rain (20%)</text>
+                    <text x="105" y="160" font-size="12" text-anchor="middle">Utility = +2</text>
+                    <text x="105" y="190" font-size="13" text-anchor="middle" font-weight="bold" fill="#2d5016">Expected: 6.8</text>
+                    
+                    <rect x="220" y="50" width="150" height="200" fill="white" stroke="#ff6b6b" stroke-width="2" rx="4"/>
+                    <text x="295" y="75" font-size="14" text-anchor="middle" font-weight="bold">No Umbrella</text>
+                    <text x="295" y="100" font-size="12" text-anchor="middle">If Rain (80%)</text>
+                    <text x="295" y="120" font-size="12" text-anchor="middle">Utility = -5</text>
+                    <text x="295" y="140" font-size="12" text-anchor="middle">If No Rain (20%)</text>
+                    <text x="295" y="160" font-size="12" text-anchor="middle">Utility = +5</text>
+                    <text x="295" y="190" font-size="13" text-anchor="middle" font-weight="bold" fill="#ff6b6b">Expected: -1.0</text>
+                    
+                    <text x="200" y="280" font-size="14" text-anchor="middle" font-weight="bold" fill="#2d5016">RATIONAL CHOICE: Bring Umbrella</text>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 14: Rationality in Action -->
+    <section>
+        <div class="section-content full-width">
+            <div class="section-text">
+                <span class="speaker-badge">GARV</span>
+                <h2>Rationality in Action</h2>
+                <p class="subtitle">The Black Hole Heuristic Game</p>
+
+                <div class="key-insight">
+                    <strong>The Scenario:</strong> An AI navigates a 3×3 grid. One hidden cell is the "Black Hole" (score = -100). The AI doesn't know where it is, but it can reason probabilistically.
+                </div>
+
+                <ul class="bullet-list" style="margin-top: 40px;">
+                    <li><strong>The Challenge:</strong> Maximize score without knowing danger zones</li>
+                    <li><strong>The Strategy:</strong> Sacrifice low numbers in risky areas, keep high numbers safe</li>
+                    <li><strong>The Math:</strong> Every move is an MEU calculation</li>
+                    <li><strong>The Result:</strong> The AI wins because it reasons under uncertainty systematically</li>
+                </ul>
+
+                <div class="example-box">
+                    <strong>Human vs AI:</strong> Humans might say "I'll just avoid the risky area." AI says "Cell (1,1) has 1/9 chance of being the hole. If I go there, expected loss is -100/9 ≈ -11. So place my low-value token there." Much smarter.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FINAL TAKEAWAY POLL -->
+    <section class="interaction" id="interaction" style="background: #fdfdfd; min-height: auto; padding: 100px 80px;">
+        <div class="section-content" style="display: block; text-align: center;">
+            <h1>Final Takeaway</h1>
+            <p class="subtitle">After seeing the math and the logic, how do you feel about AI decision making now?</p>
+            
+            <div class="interaction-container">
+                <iframe src="https://wall.sli.do/event/oTc2U8UNFvv23LeTqttbFP?section=313bcac4-b458-4945-a3e2-aa740842d73a" title="Final Word Cloud"></iframe>
+            </div>
+        </div>
+    </section>
+
+    <!-- Q&A SECTION -->
+    <section class="qa-section" id="qa-section">
+        <div class="qa-container">
+            <h2 style="text-align: center; margin-bottom: 60px;">Common Questions</h2>
+            
+            <div class="qa-item">
+                <button class="qa-header">
+                    <span class="qa-question">Why can't we just use strict logic for everything?</span>
+                    <span class="qa-icon">+</span>
+                </button>
+                <div class="qa-content">
+                    <p class="qa-answer">Because the real world has infinite exceptions. To account for every possibility (like a bird not flying because it has a wing in a cast), our rules would grow too large to manage. Probability allows us to capture all these exceptions in a single number.</p>
+                </div>
+            </div>
+
+            <div class="qa-item">
+                <button class="qa-header">
+                    <span class="qa-question">How does Bayes' Theorem help AI learn?</span>
+                    <span class="qa-icon">+</span>
+                </button>
+                <div class="qa-content">
+                    <p class="qa-answer">It provides a mathematical way to update "prior" beliefs based on new evidence, resulting in a more accurate "posterior" probability. This iterative process is how AI systems refine their understanding as they see more data.</p>
+                </div>
+            </div>
+
+            <div class="qa-item">
+                <button class="qa-header">
+                    <span class="qa-question">What is the main benefit of a Bayesian Network?</span>
+                    <span class="qa-icon">+</span>
+                </button>
+                <div class="qa-content">
+                    <p class="qa-answer">It simplifies complex probability problems by showing which variables actually affect each other. By using "conditional independence," we avoid calculating billions of unnecessary combinations, making AI reasoning possible on normal computers.</p>
+                </div>
+            </div>
+
+            <div class="qa-item">
+                <button class="qa-header">
+                    <span class="qa-question">How does AI decide on an action when unsure?</span>
+                    <span class="qa-icon">+</span>
+                </button>
+                <div class="qa-content">
+                    <p class="qa-answer">AI uses Decision Theory, specifically Maximum Expected Utility (MEU). It calculates the "payoff" for every possible action multiplied by the probability of success, then chooses the path that offers the highest mathematical value.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CLOSING SECTION -->
+    <section class="closing" id="closing">
+        <h1>Key Takeaways</h1>
+        <p class="subtitle">From Uncertainty to Rational Action</p>
+        
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-number">01</div>
+                <h3>The Logic Gap</h3>
+                <p>Strict "If-Then" logic fails in the real world because exceptions are infinite. AI needs a more flexible way to reason.</p>
+            </div>
+            <div class="summary-card">
+                <div class="summary-number">02</div>
+                <h3>Probability Theory</h3>
+                <p>By moving from binary (True/False) to degrees of belief (0-1), AI can represent and handle uncertainty naturally.</p>
+            </div>
+            <div class="summary-card">
+                <div class="summary-number">03</div>
+                <h3>Bayesian Learning</h3>
+                <p>Bayes' Theorem provides the engine for updating beliefs, allowing systems to learn and adapt as they see new data.</p>
+            </div>
+            <div class="summary-card">
+                <div class="summary-number">04</div>
+                <h3>System Mapping</h3>
+                <p>Bayesian Networks visualize complex relationships and use conditional independence to make computation efficient.</p>
+            </div>
+            <div class="summary-card">
+                <div class="summary-number">05</div>
+                <h3>Rational Decisions</h3>
+                <p>Decision Theory combines probability with utility (value), enabling AI to choose the most beneficial path forward.</p>
+            </div>
+        </div>
+
+        <div class="final-callout" style="margin-top: 80px; margin-bottom: 0;">
+            <strong>The Big Picture</strong>
+            <p>Every modern AI system—from the recommendations on your phone to autonomous vehicles—relies on these core principles to survive in an unpredictable world. By computing probabilities and maximizing expected utility, AI turns uncertainty into its greatest strength.</p>
+        </div>
+    </section>
+
+    <script>
+        let noiseSource = null;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Generate aggressive static noise with glitches
+        function createNoise() {
+            const bufferSize = 2 * audioCtx.sampleRate;
+            const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                // Heavier white noise + random crackle/pops
+                let value = (Math.random() * 2 - 1) * 0.4;
+                
+                // Add periodic 'pops'
+                if (Math.random() > 0.999) value += (Math.random() * 2 - 1) * 0.8;
+                
+                // Low frequency rumble
+                value += (Math.sin(i * 0.05) * 0.1);
+                
+                output[i] = value;
+            }
+            return noiseBuffer;
+        }
+
+        function playNoise() {
+            if (noiseSource) noiseSource.stop();
+            noiseSource = audioCtx.createBufferSource();
+            noiseSource.buffer = createNoise();
+            noiseSource.loop = true;
+            
+            // Shifting Band-Pass Filter (simulates radio interference)
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(400, audioCtx.currentTime);
+            filter.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 2);
+            filter.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 4);
+            filter.Q.value = 5; // High resonance
+            
+            noiseSource.connect(filter);
+            filter.connect(audioCtx.destination);
+            noiseSource.start();
+        }
+
+        function stopNoise() {
+            if (noiseSource) {
+                noiseSource.stop();
+                noiseSource = null;
+            }
+        }
+
+        // Use Web Speech API for Human-like speech with added noise
+        function speakUncertainty() {
+            if ('speechSynthesis' in window) {
+                // Resume audio context (needed for browser policies)
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                window.speechSynthesis.cancel();
+                stopNoise();
+
+                const text = "The only certainty is that nothing is certain. Knowledge is limited, but reasoning is infinite. We must learn to act when the path is unclear.";
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                const voices = window.speechSynthesis.getVoices();
+                const preferredVoice = voices.find(v => v.name.includes('Male') || v.name.includes('Google UK')) || voices[0];
+                
+                if (preferredVoice) utterance.voice = preferredVoice;
+                
+                utterance.pitch = 0.4; // Extremely low, growling pitch
+                utterance.rate = 0.65; // Even slower and more distorted
+                utterance.volume = 0.45; // Lowered volume to fight with the noise
+
+                // Start the noise
+                playNoise();
+
+                window.speechSynthesis.speak(utterance);
+                
+                const btn = document.getElementById('initAudioBtn');
+                btn.textContent = "Decoding Signal...";
+                btn.style.opacity = "0.7";
+                
+                utterance.onend = () => {
+                    stopNoise();
+                    btn.textContent = "Speak Uncertainty Again";
+                    btn.style.opacity = "1";
+                };
+
+                utterance.onerror = () => {
+                    stopNoise();
+                };
+            } else {
+                alert("Sorry, your browser does not support human-like speech synthesis.");
+            }
+        }
+
+        // Initialize voices (needed for some browsers)
+        window.speechSynthesis.getVoices();
+
+        document.getElementById('initAudioBtn').addEventListener('click', function() {
+            speakUncertainty();
+        });
+
+        // Smooth navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Contradiction Detector Logic
+        function revealBias(choice) {
+            const reveal = document.getElementById('biasReveal');
+            const desc = document.getElementById('biasDesc');
+            reveal.style.display = 'block';
+            
+            if (choice === 'hire') {
+                desc.innerHTML = "<strong>Your Instinct:</strong> 'Hire them!' You fell into the <strong>Base Rate Trap</strong>. You trusted the tool's accuracy but ignored how rare Star candidates actually are.";
+            } else {
+                desc.innerHTML = "<strong>Your Instinct:</strong> 'Wait.' Good caution! Even though the tool is 90% accurate, the probability they are a star is still surprisingly low due to the rare base rate.";
+            }
+            
+            // Highlight the choice
+            document.querySelectorAll('.choice-card').forEach(card => card.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+        }
+
+        // Network Builder Logic
+        let selectedNode = null;
+        let connections = [];
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
+
+        const builderArea = document.getElementById('builderArea');
+        builderArea.addEventListener('dragover', (e) => e.preventDefault());
+        builderArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const id = e.dataTransfer.getData("text");
+            const node = document.getElementById(id);
+            const rect = builderArea.getBoundingClientRect();
+            node.style.left = (e.clientX - rect.left - 50) + 'px';
+            node.style.top = (e.clientY - rect.top - 20) + 'px';
+            drawConnections();
+        });
+
+        document.querySelectorAll('.concept-chip').forEach(node => {
+            node.addEventListener('click', () => {
+                if (!selectedNode) {
+                    selectedNode = node;
+                    node.style.borderColor = "#ff9800";
+                } else if (selectedNode === node) {
+                    selectedNode.style.borderColor = "var(--accent)";
+                    selectedNode = null;
+                } else {
+                    // Create connection
+                    connections.push({from: selectedNode.id, to: node.id});
+                    selectedNode.style.borderColor = "var(--accent)";
+                    selectedNode = null;
+                    drawConnections();
+                }
+            });
+        });
+
+        function drawConnections() {
+            const canvas = document.getElementById('networkCanvas');
+            const ctx = canvas.getContext('2d');
+            const rect = builderArea.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = "#333";
+            ctx.lineWidth = 2;
+            
+            connections.forEach(conn => {
+                const fromNode = document.getElementById(conn.from);
+                const toNode = document.getElementById(conn.to);
+                
+                const fromX = parseInt(fromNode.style.left) + 60;
+                const fromY = parseInt(fromNode.style.top) + 20;
+                const toX = parseInt(toNode.style.left) + 60;
+                const toY = parseInt(toNode.style.top) + 20;
+                
+                // Draw line with arrow
+                ctx.beginPath();
+                ctx.moveTo(fromX, fromY);
+                ctx.lineTo(toX, toY);
+                ctx.stroke();
+                
+                // Small arrowhead
+                const angle = Math.atan2(toY - fromY, toX - fromX);
+                ctx.beginPath();
+                ctx.moveTo(toX, toY);
+                ctx.lineTo(toX - 15 * Math.cos(angle - Math.PI / 6), toY - 15 * Math.sin(angle - Math.PI / 6));
+                ctx.lineTo(toX - 15 * Math.cos(angle + Math.PI / 6), toY - 15 * Math.sin(angle + Math.PI / 6));
+                ctx.closePath();
+                ctx.fillStyle = "#333";
+                ctx.fill();
+            });
+        }
+
+        function clearLines() {
+            connections = [];
+            drawConnections();
+        }
+
+        // Initialize canvas size
+        window.addEventListener('resize', () => {
+            drawConnections();
+            resizeDoodleCanvas();
+        });
+        setTimeout(drawConnections, 500);
+
+        // SMARTBOARD: Doodle Logic
+        const doodleCanvas = document.getElementById('doodleCanvas');
+        const ctx = doodleCanvas.getContext('2d');
+        let isDrawing = false;
+        let doodleActive = false;
+
+        function resizeDoodleCanvas() {
+            doodleCanvas.width = window.innerWidth;
+            doodleCanvas.height = window.innerHeight;
+        }
+        resizeDoodleCanvas();
+
+        document.getElementById('penBtn').addEventListener('click', function() {
+            doodleActive = !doodleActive;
+            this.classList.toggle('active');
+            doodleCanvas.classList.toggle('active');
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', function() {
+            ctx.clearRect(0, 0, doodleCanvas.width, doodleCanvas.height);
+        });
+
+        document.getElementById('fullBtn').addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        function startDrawing(e) {
+            if (!doodleActive) return;
+            isDrawing = true;
+            draw(e);
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.beginPath();
+        }
+
+        function draw(e) {
+            if (!isDrawing || !doodleActive) return;
+            
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#d32f2f'; // Red ink for visibility
+
+            const x = e.clientX || e.touches[0].clientX;
+            const y = e.clientY || e.touches[0].clientY;
+
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        doodleCanvas.addEventListener('mousedown', startDrawing);
+        doodleCanvas.addEventListener('mousemove', draw);
+        doodleCanvas.addEventListener('mouseup', stopDrawing);
+        doodleCanvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); });
+        doodleCanvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
+        doodleCanvas.addEventListener('touchend', stopDrawing);
+
+        // SMARTBOARD: Tap-to-Focus Bullets
+        document.querySelectorAll('.bullet-list li').forEach(li => {
+            li.addEventListener('click', function() {
+                // If already focused, unfocus all
+                if (this.classList.contains('focused-point')) {
+                    document.querySelectorAll('.bullet-list li').forEach(el => el.classList.remove('focused-point'));
+                } else {
+                    document.querySelectorAll('.bullet-list li').forEach(el => el.classList.remove('focused-point'));
+                    this.classList.add('focused-point');
+                }
+            });
+        });
+
+        // SMARTBOARD: Giant Nav Logic
+        const sections = Array.from(document.querySelectorAll('section, .closing'));
+        function navigateSections(direction) {
+            let currentSectionIndex = 0;
+            const scrollPos = window.scrollY + 100;
+
+            sections.forEach((sec, index) => {
+                if (sec.offsetTop <= scrollPos) {
+                    currentSectionIndex = index;
+                }
+            });
+
+            let nextIndex = currentSectionIndex + direction;
+            if (nextIndex >= 0 && nextIndex < sections.length) {
+                sections[nextIndex].scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Sticky nav detection + Scroll visibility
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            const heroHeight = document.querySelector('.hero').offsetHeight;
+            
+            // Progress Bar Logic
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById("myBar").style.width = scrolled + "%";
+
+            if (window.scrollY > heroHeight * 0.5) {
+                nav.classList.add('nav-visible');
+            } else {
+                nav.classList.remove('nav-visible');
+            }
+
+            if (window.scrollY > 100) {
+                nav.style.boxShadow = '0 4px 12px rgba(0,0,0,0.12)';
+            } else {
+                nav.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+            }
+        });
+
+        // Accordion Logic
+        document.querySelectorAll('.qa-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const item = header.parentElement;
+                const isActive = item.classList.contains('active');
+                
+                // Close all other items
+                document.querySelectorAll('.qa-item').forEach(otherItem => {
+                    otherItem.classList.remove('active');
+                });
+                
+                // Toggle current item
+                if (!isActive) {
+                    item.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
