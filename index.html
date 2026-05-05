@@ -1076,11 +1076,11 @@
         <h1 style="display: none;">Uncertain Knowledge and Reasoning Methods</h1>
         <div class="subtitle" style="display: none;">How AI Survives When It Doesn't Have All the Facts</div>
         
-            <h3 style="margin-bottom: 20px; color: var(--accent);">Uncertainty Voice</h3>
-            <p id="speechText" style="font-style: italic; color: var(--medium-gray); margin-bottom: 20px;">"The only certainty is that nothing is certain..."</p>
+            <h3 style="margin-bottom: 20px; color: var(--accent);"></h3>
+            <p id="speechText" style="font-style: italic; color: var(--medium-gray); margin-bottom: 20px;"></p>
             <div id="audioContainer"></div>
-            <p>🔊 Press the button below to hear the voice of Uncertainty. We use the browser's vocal engine to speak what we cannot know.</p>
-            <button id="initAudioBtn" style="margin-top: 15px; padding: 12px 24px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; display: inline-block;">Speak Uncertainty</button>
+            <p>🔊 Press the button below to hear the intercepted transmission.</p>
+            <button id="initAudioBtn" style="margin-top: 15px; padding: 12px 24px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; display: inline-block;">Play Signal</button>
 
         <div class="presenter-info" style="display: none;">
             <strong>Presented by:</strong> Garv, Suvarna, and Ketki
@@ -1092,8 +1092,8 @@
     <!-- INTRO POLL -->
     <section class="interaction" id="intro-poll" style="background: white; min-height: auto; padding: 60px 20px;">
         <div class="section-content" style="display: block; text-align: center;">
-            <h2 style="font-size: 32px; color: var(--accent); margin-bottom: 10px;">Icebreaker: First Impressions</h2>
-            <p class="subtitle" style="margin-bottom: 30px;">What is the first word that comes to mind when you hear "AI Uncertainty"?</p>
+            <h2 style="font-size: 32px; color: var(--accent); margin-bottom: 10px;">First Impressions</h2>
+            <p class="subtitle" style="margin-bottom: 30px;">What are the first words that comes to mind when you heard the above audio?</p>
             <div class="interaction-container">
                 <iframe src="https://wall.sli.do/event/oTc2U8UNFvv23LeTqttbFP?section=e148de15-43b2-4e78-b6a3-0d0799ca3850" title="Intro Word Cloud"></iframe>
             </div>
@@ -1103,8 +1103,8 @@
     <!-- SECTION 1: The Qualification Problem -->
     <section id="qualification">
         <div class="section-content">
-            <div class="section-text fuzzy-concept" onclick="this.classList.add('observed')">
-                <div class="observation-hint">Tap to Observe Concept</div>
+            <div class="section-text">
+
                 <span class="speaker-badge">GARV</span>
                 <h2>The Qualification Problem</h2>
                 <p class="subtitle">Why Strict Logic Fails</p>
@@ -1896,103 +1896,28 @@
     </section>
 
     <script>
-        let noiseSource = null;
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const uncertaintyAudio = new Audio('military-radio-communication.mp3');
 
-        // Generate aggressive static noise with glitches
-        function createNoise() {
-            const bufferSize = 2 * audioCtx.sampleRate;
-            const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-            const output = noiseBuffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) {
-                // Heavier white noise + random crackle/pops
-                let value = (Math.random() * 2 - 1) * 0.4;
-                
-                // Add periodic 'pops'
-                if (Math.random() > 0.999) value += (Math.random() * 2 - 1) * 0.8;
-                
-                // Low frequency rumble
-                value += (Math.sin(i * 0.05) * 0.1);
-                
-                output[i] = value;
-            }
-            return noiseBuffer;
-        }
-
-        function playNoise() {
-            if (noiseSource) noiseSource.stop();
-            noiseSource = audioCtx.createBufferSource();
-            noiseSource.buffer = createNoise();
-            noiseSource.loop = true;
-            
-            // Shifting Band-Pass Filter (simulates radio interference)
-            const filter = audioCtx.createBiquadFilter();
-            filter.type = 'bandpass';
-            filter.frequency.setValueAtTime(400, audioCtx.currentTime);
-            filter.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 2);
-            filter.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 4);
-            filter.Q.value = 5; // High resonance
-            
-            noiseSource.connect(filter);
-            filter.connect(audioCtx.destination);
-            noiseSource.start();
-        }
-
-        function stopNoise() {
-            if (noiseSource) {
-                noiseSource.stop();
-                noiseSource = null;
-            }
-        }
-
-        // Use Web Speech API for Human-like speech with added noise
         function speakUncertainty() {
-            if ('speechSynthesis' in window) {
-                // Resume audio context (needed for browser policies)
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-
-                window.speechSynthesis.cancel();
-                stopNoise();
-
-                const text = "The only certainty is that nothing is certain. Knowledge is limited, but reasoning is infinite. We must learn to act when the path is unclear.";
-                const utterance = new SpeechSynthesisUtterance(text);
-                
-                const voices = window.speechSynthesis.getVoices();
-                const preferredVoice = voices.find(v => v.name.includes('Male') || v.name.includes('Google UK')) || voices[0];
-                
-                if (preferredVoice) utterance.voice = preferredVoice;
-                
-                utterance.pitch = 0.4; // Extremely low, growling pitch
-                utterance.rate = 0.65; // Even slower and more distorted
-                utterance.volume = 0.45; // Lowered volume to fight with the noise
-
-                // Start the noise
-                playNoise();
-
-                window.speechSynthesis.speak(utterance);
-                
-                const btn = document.getElementById('initAudioBtn');
-                btn.textContent = "Decoding Signal...";
+            const btn = document.getElementById('initAudioBtn');
+            
+            if (uncertaintyAudio.paused) {
+                uncertaintyAudio.play().catch(e => console.error("Audio play failed:", e));
+                btn.textContent = "Playing Signal...";
                 btn.style.opacity = "0.7";
-                
-                utterance.onend = () => {
-                    stopNoise();
-                    btn.textContent = "Speak Uncertainty Again";
-                    btn.style.opacity = "1";
-                };
-
-                utterance.onerror = () => {
-                    stopNoise();
-                };
             } else {
-                alert("Sorry, your browser does not support human-like speech synthesis.");
+                uncertaintyAudio.pause();
+                uncertaintyAudio.currentTime = 0;
+                btn.textContent = "Play Signal Again";
+                btn.style.opacity = "1";
             }
         }
 
-        // Initialize voices (needed for some browsers)
-        window.speechSynthesis.getVoices();
+        uncertaintyAudio.onended = () => {
+            const btn = document.getElementById('initAudioBtn');
+            btn.textContent = "Play Signal Again";
+            btn.style.opacity = "1";
+        };
 
         document.getElementById('initAudioBtn').addEventListener('click', function() {
             speakUncertainty();
